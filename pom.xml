@@ -40,7 +40,7 @@
 
     <properties>
         <docker.image.prefix>valdazure</docker.image.prefix>
-        <docker.image.url>######-microsoft.azurecr.io</docker.image.url>
+        <docker.image.url>valdazure-microsoft.azurecr.io</docker.image.url>
         <java.version>1.8</java.version>
     </properties>
 

@@ -8,7 +8,7 @@ ENV APP_HOME /app
 RUN mkdir $APP_HOME
 RUN mkdir $APP_HOME/config
 
-ADD javawebapp-1.0-SNAPSHOT.jar $APP_HOME/app.jar
+ADD devopsdemo-javawebapp-1.0-SNAPSHOT.jar $APP_HOME/app.jar
 
 WORKDIR $APP_HOME
 RUN bash -c 'touch app.jar'
