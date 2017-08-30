@@ -25,7 +25,7 @@
         <hudson.model.StringParameterDefinition>
           <name>acr</name>
           <description></description>
-          <defaultValue>{insert-container-repository}</defaultValue>
+          <defaultValue>{insert-container-registry}</defaultValue>
         </hudson.model.StringParameterDefinition>
         <hudson.model.StringParameterDefinition>
           <name>registry_credentials_id</name>
