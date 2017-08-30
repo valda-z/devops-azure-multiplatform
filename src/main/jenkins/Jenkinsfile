@@ -1,9 +1,9 @@
 node {
     jdk = tool name: params.jdk
     env.JAVA_HOME = "${jdk}"
- 
+
     echo "jdk installation path is: ${jdk}"
-  
+
     withMaven(
         maven: params.maven
         ){
@@ -14,17 +14,18 @@ node {
           git branch: params.git_branch, url: params.git_repo
         }
         stage('Maven build') {
-            sh 'mvn clean package' 
+            sh 'mvn clean package'
         }
         stage('Build Docker image') {
             dir('target'){
-                built_img = docker.build(params.acr + "/" + params.img_name + ":${env.BUILD_NUMBER}", '.')
+                built_img = docker.build(params.acr + "/" + params.img_name, '.')
             }
         }
 
         stage('Push Docker image to Azure Container Registry') {
             docker.withRegistry("https://" + params.acr, params.registry_credentials_id ) {
-            built_img.push(params.img_name + "${env.BUILD_NUMBER}");
+            built_img.push("${env.BUILD_NUMBER}")
+            built_img.push("latest")
           }
         }
     }

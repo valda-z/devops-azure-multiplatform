@@ -69,13 +69,14 @@
         }
         stage(&apos;Build Docker image&apos;) {
             dir(&apos;target&apos;){
-                built_img = docker.build(params.acr + &quot;/&quot; + params.img_name + &quot;:${env.BUILD_NUMBER}&quot;, &apos;.&apos;)
+                built_img = docker.build(params.acr + &quot;/&quot; + params.img_name, &apos;.&apos;)
             }
         }
 
         stage(&apos;Push Docker image to Azure Container Registry&apos;) {
             docker.withRegistry(&quot;https://&quot; + params.acr, params.registry_credentials_id ) {
-            built_img.push(params.img_name + &quot;${env.BUILD_NUMBER}&quot;);
+            built_img.push(&quot;${env.BUILD_NUMBER}&quot;)
+            built_img.push(&quot;latest&quot;)
           }
         }
     }
