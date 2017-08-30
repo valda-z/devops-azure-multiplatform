@@ -16,7 +16,7 @@ Solution can be provisioned by this template, important attributes are:
 
 After successful deployment you can reach your application from web browser on URL: `https://[YOUR-FUNCTIONAPP-NAME].azurewebsites.net` 
 
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fvalda-z%2Ffunctionapp-demo%2Fmaster%2Fazuredeploy.json" target="_blank">
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fvalda-z%2Fdevops-azure-multiplatform%2Ffuncapp%2Fazuredeploy.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
 
