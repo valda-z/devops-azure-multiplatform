@@ -1,0 +1,20 @@
+{
+    "$schema": "http://json.schemastore.org/proxies",
+    "proxies": {
+        "API": {
+            "desc": [
+                "Default Route to ensure existing Function apps and portal works. Do not remove"
+            ],
+            "matchCondition": {
+                "route": "/api/{*rest}"
+            },
+            "backendUri": "https://%WEBSITE_HOSTNAME%/api/{rest}"
+        },
+        "WebServer": {
+            "matchCondition": {
+                "route": "{*path}"
+            },
+            "backendUri": "https://%WEBSITE_HOSTNAME%/api/StaticFileServer?file={path}"
+        }
+    }
+}

@@ -1,0 +1,25 @@
+{
+    "bindings": [{
+            "authLevel": "anonymous",
+            "type": "httpTrigger",
+            "direction": "in",
+            "name": "req"
+        },
+        {
+            "type": "http",
+            "direction": "out",
+            "name": "res"
+        },
+        {
+            "type": "documentDB",
+            "name": "documents",
+            "databaseName": "fatest",
+            "collectionName": "fatestcol",
+            "createIfNotExists": true,
+            "connection": "valdafa_DOCUMENTDB",
+            "direction": "in",
+            "sqlQuery": "SELECT * from c"
+        }
+    ],
+    "disabled": false
+}
