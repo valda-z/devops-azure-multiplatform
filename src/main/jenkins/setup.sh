@@ -16,6 +16,7 @@ job_description="A basic pipeline that builds a Docker container."
 scm_poll_schedule="* * * * * *"
 scm_poll_ignore_commit_hooks="0"
 artifacts_location="https://raw.githubusercontent.com/valda-z/devops-azure-multiplatform/java/src/main/jenkins/"
+artifacts_location_devopsutils="https://raw.githubusercontent.com/Azure/azure-devops-utils/master/"
 jenkins_jdk="JDK8_121"
 jenkins_maven="Maven3"
 
@@ -24,6 +25,14 @@ do
   key="$1"
   shift
   case $key in
+    --jenkins_fqdn|-jf)
+      jenkins_fqdn="$1"
+      shift
+      ;;
+    --jenkins_release_type|-jrt)
+      jenkins_release_type="$1"
+      shift
+      ;;
     --git_url|-g)
       git_url="$1"
       shift
@@ -99,6 +108,16 @@ done
 # supporting functions
 #
 ######################################################################################
+function run_util_script_devops() {
+  local script_path="$1"
+  shift
+  curl --silent "${artifacts_location_devopsutils}${script_path}${artifacts_location_sas_token}" | sudo bash -s -- "$@"
+  local return_value=$?
+  if [ $return_value -ne 0 ]; then
+    >&2 echo "Failed while executing script '$script_path'."
+    exit $return_value
+  fi
+}
 
 function throw_if_empty() {
   local name="$1"
@@ -165,6 +184,13 @@ throw_if_empty --registry $registry
 throw_if_empty --registry_user_name $registry_user_name
 throw_if_empty --registry_password $registry_password
 throw_if_empty --docker_imagename $docker_imagename
+throw_if_empty --jenkins_fqdn $jenkins_fqdn
+throw_if_empty --jenkins_release_type $jenkins_release_type
+
+######################################################################################
+#install Jenkins by official script
+######################################################################################
+run_util_script_devops "jenkins/install_jenkins.sh"
 
 #install git
 sudo apt-get install git --yes
