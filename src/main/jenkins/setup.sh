@@ -5,7 +5,7 @@ jenkins_url="http://localhost:8080/"
 jenkins_username="admin"
 
 # NOTE: Intentionally setting this after the first retry_until_successful to ensure the initialAdminPassword file exists
-jenkins_password=`sudo cat /var/lib/jenkins/secrets/initialAdminPassword`
+jenkins_password="NONE"
 
 #process input parameters
 credentials_id="docker_credentials"
@@ -191,6 +191,9 @@ throw_if_empty --jenkins_release_type $jenkins_release_type
 #install Jenkins by official script
 ######################################################################################
 run_util_script_devops "jenkins/install_jenkins.sh"
+
+#grab jenkins password  (initial)
+jenkins_password=`sudo cat /var/lib/jenkins/secrets/initialAdminPassword`
 
 #install git
 sudo apt-get install git --yes
