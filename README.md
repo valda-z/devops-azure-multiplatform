@@ -1,6 +1,11 @@
-# Function App and Azure Cosmos DB demo
+# DEVOPS Function App - Function App and Azure Cosmos DB demo
 
 This demo contains simple one page web app with REST API backend and Azure Cosmos DB for data persistence.
+
+Demonstrated DEVOPS scenario:
+* automatically create infrastructure environment (Function App and Azure Cosmos DB).
+* configure Function App with Azure Cosmos DB credentials and GitHub repository with application source codes.
+* When developer changes application code and pushed changes to `funcapp` branch Function App collect changes from GitHub and deploy new version of application.
 
 Function App:
 * exposes REST APIs for listing ToDoes, creating and editing ToDo records.
@@ -22,6 +27,6 @@ After successful deployment you can reach your application from web browser on U
 
 Notes:
 If you want to change code or in another way to play with application use these steps:
-* fork original repository (to be able to commit changes there) - original repo: https://github.com/valda-z/functionapp-demo
+* fork original repository (to be able to commit changes there) - original repo: https://github.com/valda-z/devops-azure-multiplatform/tree/funcapp
 * when deploying application by template use your Repo URL in field "Repo URL"
 * when you are done with changes you can git add; git commit; git push your changes to github, Function App will collect new version of files automatically in few seconds and you can see new version of your app deployed.

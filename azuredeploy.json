@@ -10,14 +10,14 @@
         },
         "repoURL": {
             "type": "string",
-            "defaultValue": "https://github.com/valda-z/functionapp-demo.git",
+            "defaultValue": "https://github.com/valda-z/devops-azure-multiplatform.git",
             "metadata": {
                 "description": "Github URL for application deployment."
             }
         },
         "branch": {
             "type": "string",
-            "defaultValue": "master",
+            "defaultValue": "funcapp",
             "metadata": {
                 "description": "Branch name for application deployment."
             }
