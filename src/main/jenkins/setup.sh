@@ -1,5 +1,10 @@
 #!/bin/bash
 
+#log starting command
+echo "######################### setup.sh STARTING"
+echo $0 
+echo "#########################"
+
 #set defaults
 jenkins_url="http://localhost:8080/"
 jenkins_username="admin"
@@ -190,7 +195,7 @@ throw_if_empty --jenkins_release_type $jenkins_release_type
 ######################################################################################
 #install Jenkins by official script
 ######################################################################################
-run_util_script_devops "jenkins/install_jenkins.sh"
+run_util_script_devops "jenkins/install_jenkins.sh" --jenkins_fqdn "${jenkins_fqdn}" --jenkins_release_type "${jenkins_release_type}"
 
 #grab jenkins password  (initial)
 jenkins_password=`sudo cat /var/lib/jenkins/secrets/initialAdminPassword`
