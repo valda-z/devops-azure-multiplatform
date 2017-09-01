@@ -1,0 +1,106 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "webAppName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of Web App (used also for DNS name for web app *.azurewebsites.net)."
+            }
+        },
+        "mongoDbName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the MongoDB database (Azure Cosmos DB with MongoDB interface)."
+            }
+        }
+    },
+    "variables": {
+        "dbDefaultExperience": "MongoDB",
+        "linuxFxVersion": "node|6.11",
+        "appCommandLine": "app.js",
+        "gitUrl": "https://github.com/valda-z/devops-azure-multiplatform.git",
+        "gitBranch": "nodejs"
+    },
+    "resources": [{
+            "apiVersion": "2015-04-08",
+            "kind": "[variables('dbDefaultExperience')]",
+            "type": "Microsoft.DocumentDb/databaseAccounts",
+            "name": "[parameters('mongoDbName')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "databaseAccountOfferType": "Standard",
+                "locations": [{
+                    "id": "[concat(parameters('mongoDbName'), '-', resourceGroup().location)]",
+                    "failoverPriority": 0,
+                    "locationName": "[resourceGroup().location]"
+                }]
+            },
+            "tags": {
+                "defaultExperience": "[variables('dbDefaultExperience')]"
+            }
+        },
+        {
+            "apiVersion": "2016-03-01",
+            "name": "[parameters('webAppName')]",
+            "type": "Microsoft.Web/sites",
+            "properties": {
+                "name": "[parameters('webAppName')]",
+                "siteConfig": {
+                    "appSettings": [{
+                            "name": "PORT",
+                            "value": "8080"
+                        },
+                        {
+                            "name": "MONGO_URI",
+                            "value": "[concat('mongodb://',parameters('mongoDbName'),':',listKeys(resourceId('Microsoft.DocumentDb/databaseAccounts', parameters('mongoDbName')), '2015-04-08').primaryMasterKey,'@',parameters('mongoDbName'),'.documents.azure.com:10255/?ssl=true&replicaSet=globaldb')]"
+                        }
+                    ],
+                    "appCommandLine": "[variables('appCommandLine')]",
+                    "linuxFxVersion": "[variables('linuxFxVersion')]"
+                },
+                "serverFarmId": "[concat(resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', parameters('webAppName'))]",
+                "hostingEnvironment": ""
+            },
+            "resources": [{
+                "apiVersion": "2016-03-01",
+                "name": "web",
+                "type": "sourcecontrols",
+                "dependsOn": [
+                    "[resourceId('Microsoft.Web/Sites', parameters('webAppName'))]"
+                ],
+                "properties": {
+                    "RepoUrl": "[variables('gitUrl')]",
+                    "branch": "[variables('gitBranch')]",
+                    "IsManualIntegration": true
+                }
+            }],
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', parameters('webAppName'))]": "empty"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Web/serverfarms/', parameters('webAppName'))]",
+                "[concat('Microsoft.DocumentDb/databaseAccounts/', parameters('mongoDbName'))]"
+            ]
+        },
+        {
+            "apiVersion": "2016-09-01",
+            "name": "[parameters('webAppName')]",
+            "type": "Microsoft.Web/serverfarms",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "name": "[parameters('webAppName')]",
+                "workerSizeId": "0",
+                "reserved": true,
+                "numberOfWorkers": "1",
+                "hostingEnvironment": ""
+            },
+            "sku": {
+                "Tier": "Standard",
+                "Name": "S1"
+            },
+            "kind": "linux"
+        }
+    ]
+}
