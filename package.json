@@ -1,0 +1,26 @@
+{
+    "name": "devops-azure-multiplatform-nodejs",
+    "version": "1.0.0",
+    "description": "",
+    "main": "app.js",
+    "dependencies": {
+        "express": "~4.7.2",
+        "mongoose": "~3.6.2",
+        "morgan": "~1.2.2",
+        "body-parser": "~1.5.2",
+        "method-override": "~2.1.2"
+    },
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/valda-z/devops-azure-multiplatform.git"
+    },
+    "author": "valdemar.zavadsky@microsoft.com",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/valda-z/devops-azure-multiplatform/issues"
+    },
+    "homepage": "https://github.com/valda-z/devops-azure-multiplatform#readme"
+}
