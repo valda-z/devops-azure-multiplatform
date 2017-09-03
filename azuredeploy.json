@@ -1,0 +1,144 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "sqlServerName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of Azure SQL Server instance."
+            }
+        },
+        "sqlAdministratorLogin": {
+            "type": "string",
+            "metadata": {
+                "description": "SQLServer admin user name."
+            }
+        },
+        "sqlAdministratorLoginPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "SQL Server admin password."
+            }
+        },
+        "webAppName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of Web App (used also for DNS name for web app *.azurewebsites.net)."
+            }
+        }
+    },
+    "variables": {
+        "sqlCollation": "SQL_Latin1_General_CP1_CI_AS",
+        "sqlDatabaseName": "ToDoDB",
+        "sqlEdition": "Basic",
+        "sqlMaxSizeBytes": "2147483648",
+        "sqlRequestedServiceObjectiveId": "dd6d99bb-f193-4ec1-86f2-43d3bccbc49c",
+        "sqlConnectionString": "[concat('Server=tcp:',parameters('sqlServerName'),'.database.windows.net,1433;Initial Catalog=',variables('sqlDatabaseName'),';Persist Security Info=False;User ID=',parameters('sqlAdministratorLogin'),';Password=',parameters('sqlAdministratorLoginPassword'),';MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;')]",
+        "gitUrl": "https://github.com/valda-z/devops-azure-multiplatform.git",
+        "gitBranch": "cs"
+    },
+    "resources": [{
+            "apiVersion": "2015-05-01-preview",
+            "location": "[resourceGroup().location]",
+            "name": "[parameters('sqlServerName')]",
+            "properties": {
+                "administratorLogin": "[parameters('sqlAdministratorLogin')]",
+                "administratorLoginPassword": "[parameters('sqlAdministratorLoginPassword')]",
+                "version": "12.0"
+            },
+            "resources": [{
+                    "apiVersion": "2014-04-01-preview",
+                    "dependsOn": [
+                        "[concat('Microsoft.Sql/servers/', parameters('sqlServerName'))]"
+                    ],
+                    "location": "[resourceGroup().location]",
+                    "name": "[variables('sqlDatabaseName')]",
+                    "properties": {
+                        "collation": "[variables('sqlCollation')]",
+                        "edition": "[variables('sqlEdition')]",
+                        "maxSizeBytes": "[variables('sqlMaxSizeBytes')]",
+                        "requestedServiceObjectiveId": "[variables('sqlRequestedServiceObjectiveId')]",
+                        "sampleName": ""
+                    },
+                    "type": "databases"
+                },
+                {
+                    "apiVersion": "2014-04-01-preview",
+                    "dependsOn": [
+                        "[concat('Microsoft.Sql/servers/', parameters('sqlServerName'))]"
+                    ],
+                    "location": "[resourceGroup().location]",
+                    "name": "AllowAllWindowsAzureIps",
+                    "properties": {
+                        "endIpAddress": "0.0.0.0",
+                        "startIpAddress": "0.0.0.0"
+                    },
+                    "type": "firewallrules"
+                }
+            ],
+            "type": "Microsoft.Sql/servers"
+        },
+        {
+            "apiVersion": "2016-03-01",
+            "name": "[parameters('webAppName')]",
+            "type": "Microsoft.Web/sites",
+            "properties": {
+                "name": "[parameters('webAppName')]",
+                "serverFarmId": "[concat(resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', parameters('webAppName'))]",
+                "hostingEnvironment": ""
+            },
+            "resources": [{
+                    "apiVersion": "2016-03-01",
+                    "type": "config",
+                    "name": "connectionstrings",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Web/Sites', parameters('webAppName'))]"
+                    ],
+                    "properties": {
+                        "DefaultConnection": {
+                            "value": "[variables('sqlConnectionString')]",
+                            "type": "SQLAzure"
+                        }
+                    }
+                },
+                {
+                    "apiVersion": "2016-03-01",
+                    "name": "web",
+                    "type": "sourcecontrols",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Web/Sites', parameters('webAppName'))]"
+                    ],
+                    "properties": {
+                        "RepoUrl": "[variables('gitUrl')]",
+                        "branch": "[variables('gitBranch')]",
+                        "IsManualIntegration": true
+                    }
+                }
+            ],
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', parameters('webAppName'))]": "empty"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Web/serverfarms/', parameters('webAppName'))]"
+            ]
+        },
+        {
+            "apiVersion": "2016-09-01",
+            "name": "[parameters('webAppName')]",
+            "type": "Microsoft.Web/serverfarms",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "name": "[parameters('webAppName')]",
+                "workerSizeId": "0",
+                "reserved": false,
+                "numberOfWorkers": "1",
+                "hostingEnvironment": ""
+            },
+            "sku": {
+                "Tier": "Basic",
+                "Name": "B1"
+            }
+        }
+    ]
+}
