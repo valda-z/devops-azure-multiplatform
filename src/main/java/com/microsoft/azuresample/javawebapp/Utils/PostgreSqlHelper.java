@@ -7,8 +7,12 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Component
 public class PostgreSqlHelper {
+    static final Logger LOG = LoggerFactory.getLogger(PostgreSqlHelper.class);
 
     public static String sqlurl;
 
@@ -25,6 +29,6 @@ public class PostgreSqlHelper {
         Map<String, String> env = System.getenv();
         sqlurl = env.get("POSTGRESQLSERVER_URL");
 
-        System.out.println("### INIT of PostgreSqlHelper called.");
+        LOG.info("### INIT of PostgreSqlHelper called.");
     }
 }

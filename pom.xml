@@ -36,6 +36,17 @@
             <artifactId>docker-maven-plugin</artifactId>
             <version>1.0.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.microsoft.azure</groupId>
+            <artifactId>applicationinsights-web</artifactId>
+            <!-- or applicationinsights-core for bare API -->
+            <version>[1.0,)</version>
+      </dependency>
+        <dependency>
+            <groupId>com.microsoft.azure</groupId>
+            <artifactId>applicationinsights-logging-logback</artifactId>
+            <version>[1.0,)</version>
+        </dependency>
     </dependencies>
 
     <properties>
@@ -65,6 +76,8 @@
                             <targetPath>/</targetPath>
                             <directory>${project.build.directory}</directory>
                             <include>${project.build.finalName}.jar</include>
+                            <include>applicationinsights-agent-1.0.9.jar</include>
+                            <include>AI-Agent.xml</include>
                         </resource>
                     </resources>
                     <imageTags>
@@ -86,6 +99,11 @@
                 <includes><!-- what -->
                     <include>Dockerfile</include>
                 </includes>
+            </resource>
+            <resource>
+                <filtering>false</filtering><!-- if it is neccessary -->
+                <directory>${project.basedir}/src/main/aiagent</directory><!-- from -->
+                <targetPath>${project.build.directory}</targetPath><!-- to -->
             </resource>
             <resource>
                 <directory>src/main/resources</directory>

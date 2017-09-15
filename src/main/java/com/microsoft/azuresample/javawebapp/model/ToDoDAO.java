@@ -13,15 +13,19 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Created by vazvadsk on 2016-12-05.
  */
 @Component
 public class ToDoDAO {
+    static final Logger LOG = LoggerFactory.getLogger(ToDo.class);
 
     @PostConstruct
     public void init(){
-        System.out.println("### INIT of ToDoDAO called.");
+        LOG.info("### INIT of ToDoDAO called.");
 
         try {
             Connection conn = PostgreSqlHelper.GetConnection();
@@ -39,8 +43,7 @@ public class ToDoDAO {
                 conn.close();
             }
         } catch (SQLException e) {
-            System.out.println("ERROR: cannot connect to PostgreSQL Server.");
-            e.printStackTrace();
+            LOG.error("ERROR: cannot connect to PostgreSQL Server.");
         }
     }
 
@@ -66,8 +69,7 @@ public class ToDoDAO {
                 conn.close();
             }
         } catch (SQLException e) {
-            System.out.println("ERROR: cannot connect to PostgreSQL Server.");
-            e.printStackTrace();
+            LOG.error("ERROR: cannot connect to PostgreSQL Server.");
         }
         return ret;
     }
@@ -90,8 +92,7 @@ public class ToDoDAO {
                 conn.close();
             }
         } catch (SQLException e) {
-            System.out.println("ERROR: cannot connect to PostgreSQL Server.");
-            e.printStackTrace();
+            LOG.error("ERROR: cannot connect to PostgreSQL Server.");
         }
 
         return item;
@@ -114,8 +115,7 @@ public class ToDoDAO {
                         conn.close();
                     }
                 } catch (SQLException e) {
-                    System.out.println("ERROR: cannot connect to PostgreSQL Server.");
-                    e.printStackTrace();
+                    LOG.error("ERROR: cannot connect to PostgreSQL Server.");
                 }
         
                 return item;
