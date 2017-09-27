@@ -108,7 +108,7 @@
             <resource>
                 <filtering>false</filtering><!-- if it is neccessary -->
                 <directory>${project.basedir}/src/main/helm</directory><!-- from -->
-                <targetPath>${project.build.directory}/helm</targetPath><!-- to -->
+                <targetPath>${project.build.directory}</targetPath><!-- to -->
             </resource>
             <resource>
                 <directory>src/main/resources</directory>
