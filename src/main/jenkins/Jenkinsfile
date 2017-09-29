@@ -1,33 +1,59 @@
-node {
-    jdk = tool name: params.jdk
-    env.JAVA_HOME = "${jdk}"
 
-    echo "jdk installation path is: ${jdk}"
+    //Lets define a unique label for this build.
+    def label = "buildpod.${env.JOB_NAME}.${env.BUILD_NUMBER}".replace('-', '_').replace('/', '_')
 
-    withMaven(
-        maven: params.maven
-        ){
+    //Lets create a new pod template with jnlp and maven containers, that uses that label.
+    podTemplate(label: label, containers: [
+            containerTemplate(name: 'docker', image: 'docker', ttyEnabled: true, privileged: true, command: 'cat'),     
+            containerTemplate(name: 'maven', image: 'maven', ttyEnabled: true, command: 'cat'),     
+            containerTemplate(name: 'helm', image: 'lachlanevenson/k8s-helm:v2.5.1', ttyEnabled: true, command: 'cat'),
+            containerTemplate(name: 'kubectl', image: 'lachlanevenson/k8s-kubectl:v1.6.6', ttyEnabled: true, command: 'cat'),
+            containerTemplate(name: 'jnlp', image: 'jenkinsci/jnlp-slave:alpine', command: '/usr/local/bin/jenkins-slave', args: '-url http://myjenkins-jenkins:8080 ${computer.jnlpmac} ${computer.name}', ttyEnabled: false)],           
+            volumes: [
+                hostPathVolume(mountPath: "/var/run/docker.sock", hostPath: "/var/run/docker.sock")
+                ]) {
 
-        def built_img = ''
+        //Lets use pod template (refernce by label)
+        node(label) {
 
-        stage('Checkout git repo') {
-          git branch: params.git_branch, url: params.git_repo
-        }
-        stage('Maven build') {
-            sh 'mvn clean package'
-        }
-        stage('Build Docker image') {
-            dir('target'){
-                built_img = docker.build(params.acr + "/" + params.img_name, '.')
+            def built_img = ''
+
+            stage('Checkout git repo') {
+                git url: 'https://github.com/valda-z/devops-azure-multiplatform.git', branch: 'java-k8s'            
+            }
+            stage('Maven build') {
+                //Run shell commands in the 'maven' container...            
+                container(name: 'maven') {
+                  sh 'mvn clean package'
+                }
+            }
+            stage('Build docker image') {
+                dir('target'){
+                    container(name: 'docker') {
+                      sh "docker login -p ==x9==T=W4O+ESz5+/+dY/Q9n+o8/yhK -u valdakube valdakube.azurecr.io"
+                      sh "docker build -t valdakube.azurecr.io/myimg:${env.BUILD_NUMBER} ."
+                      sh "docker tag valdakube.azurecr.io/myimg:${env.BUILD_NUMBER} valdakube.azurecr.io/myimg:latest"
+                      sh "docker push valdakube.azurecr.io/myimg:latest"
+                      sh "docker push valdakube.azurecr.io/myimg:${env.BUILD_NUMBER}"
+                    }
+                }
+            }
+            stage('Deploy docker image') {
+                container(name: 'kubectl') {
+                    sh "kubectl get nodes"
+                }
+                dir('target'){
+                    container(name: 'helm') {
+                        def overrides = "image.repository='valdakube.azurecr.io/myimg',image.tag=${env.BUILD_NUMBER},track=stable,branchName='java-k8s',branchSubdomain=''"
+                        def releaseName = "myjavawebapp"
+                        def chart_dir = "myjavawebapp"
+                        
+                        sh "helm init"
+                        sh "helm version"
+                        sh "helm lint ${chart_dir}"
+                        sh "helm upgrade --install --wait ${releaseName} ${chart_dir} --set ${overrides} --namespace='default'"
+                    }
+                }
             }
         }
-
-        stage('Push Docker image to Azure Container Registry') {
-            docker.withRegistry("https://" + params.acr, params.registry_credentials_id ) {
-            built_img.push("${env.BUILD_NUMBER}")
-            built_img.push("latest")
-          }
-        }
     }
-}
-
