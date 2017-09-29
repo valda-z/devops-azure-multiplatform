@@ -21,15 +21,15 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             - name: APPLICATION_INSIGHTS_IKEY
-                valueFrom:
-                  secretKeyRef:
-                    name: {{ template "fullname" . }}
-                    key: application-insights-ikey
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "fullname" . }}
+                  key: application-insights-ikey
             - name: POSTGRESQLSERVER_URL
-                valueFrom:
-                  secretKeyRef:
-                    name: {{ template "fullname" . }}
-                    key: postgresqlserver-url
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "fullname" . }}
+                  key: postgresqlserver-url
           ports:
             - containerPort: {{ .Values.service.internalPort }}
           livenessProbe:
