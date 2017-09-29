@@ -14,44 +14,47 @@
                 ]) {
 
         //Lets use pod template (refernce by label)
-        node(label) {
+        node(label){
+            withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: params.acr,
+                    usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]){
 
-            def built_img = ''
-
-            stage('Checkout git repo') {
-                git url: 'https://github.com/valda-z/devops-azure-multiplatform.git', branch: 'java-k8s'            
-            }
-            stage('Maven build') {
-                //Run shell commands in the 'maven' container...            
-                container(name: 'maven') {
-                  sh 'mvn clean package'
+                def built_img = ''
+    
+                stage('Checkout git repo') {
+                    git url: params.giturl, branch: params.gitbranch            
                 }
-            }
-            stage('Build docker image') {
-                dir('target'){
-                    container(name: 'docker') {
-                      sh "docker login -p ==x9==T=W4O+ESz5+/+dY/Q9n+o8/yhK -u valdakube valdakube.azurecr.io"
-                      sh "docker build -t valdakube.azurecr.io/myimg:${env.BUILD_NUMBER} ."
-                      sh "docker tag valdakube.azurecr.io/myimg:${env.BUILD_NUMBER} valdakube.azurecr.io/myimg:latest"
-                      sh "docker push valdakube.azurecr.io/myimg:latest"
-                      sh "docker push valdakube.azurecr.io/myimg:${env.BUILD_NUMBER}"
+                stage('Maven build') {
+                    //Run shell commands in the 'maven' container...            
+                    container(name: 'maven') {
+                      sh 'mvn clean package'
                     }
                 }
-            }
-            stage('Deploy docker image') {
-                container(name: 'kubectl') {
-                    sh "kubectl get nodes"
+                stage('Build docker image') {
+                    dir('target'){
+                        container(name: 'docker') {
+                          sh "docker login -p "+env.PASSWORD+" -u "+env.USERNAME+" " + params.acr
+                          sh "docker build -t "+params.acr+"/"+params.imagename+":${env.BUILD_NUMBER} ."
+                          sh "docker tag "+params.acr+"/"+params.imagename+":${env.BUILD_NUMBER} "+params.acr+"/"+params.imagename+":latest"
+                          sh "docker push "+params.acr+"/"+params.imagename+":latest"
+                          sh "docker push "+params.acr+"/"+params.imagename+":${env.BUILD_NUMBER}"
+                        }
+                    }
                 }
-                dir('target'){
-                    container(name: 'helm') {
-                        def overrides = "image.repository='valdakube.azurecr.io/myimg',image.tag=${env.BUILD_NUMBER},track=stable,branchName='java-k8s',branchSubdomain=''"
-                        def releaseName = "myjavawebapp"
-                        def chart_dir = "myjavawebapp"
-                        
-                        sh "helm init"
-                        sh "helm version"
-                        sh "helm lint ${chart_dir}"
-                        sh "helm upgrade --install --wait ${releaseName} ${chart_dir} --set ${overrides} --namespace='default'"
+                stage('Deploy docker image') {
+                    container(name: 'kubectl') {
+                        sh "kubectl get nodes"
+                    }
+                    dir('target'){
+                        container(name: 'helm') {
+                            def overrides = "image.repository='"+params.acr+"/"+params.imagename+"',image.tag=${env.BUILD_NUMBER},track=stable,branchName='"+params.gitbranch+"',branchSubdomain=''"
+                            def releaseName = "myjavawebapp"
+                            def chart_dir = "myjavawebapp"
+                            
+                            sh "helm init"
+                            sh "helm version"
+                            sh "helm lint ${chart_dir}"
+                            sh "helm upgrade --install --wait ${releaseName} ${chart_dir} --set ${overrides} --namespace='default'"
+                        }
                     }
                 }
             }
