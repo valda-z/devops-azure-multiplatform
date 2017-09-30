@@ -8,7 +8,7 @@ KUBERNETESNAME=""
 ACRNAME=""
 POSTGRESQLNAME=""
 POSTGRESQLUSER="kubeadmin"
-POSTGRESQLPASSWORD="pwd123..."
+POSTGRESQLPASSWORD="KubE123...EbuK"
 JENKINSPASSWORD="pwd123..."
 
 while [[ $# > 0 ]]
@@ -85,6 +85,7 @@ HELMCHART="myjavawebapp"
 HELMRELEASE="myjavawebapp"
 JENKINSSERVICENAME="myjenkins"
 SSHPUBKEY=~/.ssh/id_rsa.pub
+KUBERNETESADMINUSER=$(whoami)
 
 #####################################################################
 # internal variables
