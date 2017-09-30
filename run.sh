@@ -182,6 +182,7 @@ echo "      .. get kubectl credentials"
 ### initialize .kube/config
 az acs kubernetes get-credentials --resource-group=${RESOURCEGROUP} --name=${KUBERNETESNAME} > /dev/null
 retry_until_successful kubectl get nodes
+sleep 20
 
 echo "      .. helm init"
 ### initialize helm
