@@ -9,7 +9,7 @@ ACRNAME=""
 POSTGRESQLNAME=""
 POSTGRESQLUSER="kubeadmin"
 POSTGRESQLPASSWORD="KubE123...EbuK"
-JENKINSPASSWORD="pwd123..."
+JENKINSPASSWORD="password123"
 
 while [[ $# > 0 ]]
 do
@@ -158,7 +158,7 @@ APPINSIGHTS_KEY=$(az resource create -g ${RESOURCEGROUP} -n ${APPINSIGHTSNAME} -
 
 ### create postgresql as a service
 echo "  .. create postgresql PaaS database"
-az postgres server create -l ${LOCATION} -g ${RESOURCEGROUP} -n ${POSTGRESQLNAME} -u ${POSTGRESQLUSER} -p ${POSTGRESQLPASSWORD} --performance-tier Basic --compute-units 50 --ssl-enforcement Enabled --storage-size 51200 > /dev/null
+az postgres server create -l ${LOCATION} -g ${RESOURCEGROUP} -n ${POSTGRESQLNAME} -u ${POSTGRESQLUSER} -p "${POSTGRESQLPASSWORD}" --performance-tier Basic --compute-units 50 --ssl-enforcement Enabled --storage-size 51200 > /dev/null
 az postgres server firewall-rule create -g ${RESOURCEGROUP} -s ${POSTGRESQLNAME} -n allowall --start-ip-address 0.0.0.0 --end-ip-address 255.255.255.255 > /dev/null
 read postgresqlfqdn <<< $(az postgres server show -g ${RESOURCEGROUP} -n ${POSTGRESQLNAME} --query [fullyQualifiedDomainName] -o tsv)
 POSTGRESQLSERVER_URL=${POSTGRESQLSERVER_URL//'{postgresqlfqdn}'/${postgresqlfqdn}}
@@ -185,7 +185,10 @@ retry_until_successful kubectl get nodes
 
 echo "      .. helm init"
 ### initialize helm
-retry_until_successful helm init --upgrade > /dev/null
+curl -s -o helm.tar.gz https://kubernetes-helm.storage.googleapis.com/helm-v2.5.1-linux-amd64.tar.gz
+tar -zxvf helm.tar.gz
+retry_until_successful ./linux-amd64/helm init --upgrade > /dev/null
+retry_until_successful ./linux-amd64/helm version > /dev/null
 sleep 10
 
 #############################################################
@@ -196,7 +199,7 @@ echo "  .. installing jenkins"
 
 echo "      .. helming jenkins"
 ### install jenkins to kubernetes cluster
-helm install --name ${JENKINSSERVICENAME} stable/jenkins --set "Master.AdminPassword=${JENKINSPASSWORD}" >/dev/null
+./linux-amd64/helm install --name ${JENKINSSERVICENAME} stable/jenkins --set "Master.AdminPassword=${JENKINSPASSWORD}" >/dev/null
 
 echo "      .. waiting for pods"
 ### get node name
