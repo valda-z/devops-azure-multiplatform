@@ -150,7 +150,7 @@ az group create --name ${RESOURCEGROUP} --location ${LOCATION} > /dev/null
 
 ### create kubernetes cluster
 echo "  .. create ACS with kubernetes"
-az acs create --orchestrator-type kubernetes --resource-group ${RESOURCEGROUP} --name ${KUBERNETESNAME} --location ${LOCATION} --ssh-key-value "$(< ${SSHPUBKEY})" > /dev/null
+az acs create --orchestrator-type kubernetes --resource-group ${RESOURCEGROUP} --name ${KUBERNETESNAME} --location ${LOCATION} --admin-username ${KUBERNETESADMINUSER} --ssh-key-value "$(< ${SSHPUBKEY})" > /dev/null
 
 ### create application insights
 echo "  .. create App Insights"
