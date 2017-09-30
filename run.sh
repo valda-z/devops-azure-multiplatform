@@ -188,7 +188,7 @@ echo "      .. helm init"
 curl -s -o helm.tar.gz https://kubernetes-helm.storage.googleapis.com/helm-v2.5.1-linux-amd64.tar.gz
 tar -zxvf helm.tar.gz
 retry_until_successful ./linux-amd64/helm init > /dev/null
-retry_until_successful ./linux-amd64/helm version > /dev/null
+retry_until_successful ./linux-amd64/helm version
 sleep 20
 
 #############################################################
