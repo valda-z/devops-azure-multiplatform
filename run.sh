@@ -215,8 +215,16 @@ echo ""
 
 echo "      .. configuring jenkins"
 ### get jenkins token
-retry_until_successful kubectl exec ${KUBE_JENKINS} -- curl -D - -s -k -X POST -c /tmp/cook.txt -b /tmp/cook.txt -d j_username=${JENKINS_USER} -d j_password=${JENKINSPASSWORD} http://localhost:8080/j_security_check &>/dev/null
-JENKINS_KEY=$(kubectl exec ${KUBE_JENKINS} -- curl -D - -s -k -c /tmp/cook.txt -b /tmp/cook.txt http://localhost:8080/me/configure | grep "apiToken" | sed -n 's/.*id=.apiToken.\(.*\)\/>.*/\1/p' | sed -n 's/.*value=\"\([[:xdigit:]^>]*\)\".*/\1/p' 2>/dev/null)
+JENKINS_KEY=""
+echo -n "         .. get key "
+while [  -z "$JENKINS_KEY" ]; do
+    echo -n "."
+    sleep 5
+    retry_until_successful kubectl exec ${KUBE_JENKINS} -- curl -D - -s -k -X POST -c /tmp/cook.txt -b /tmp/cook.txt -d j_username=${JENKINS_USER} -d j_password=${JENKINSPASSWORD} http://localhost:8080/j_security_check &>/dev/null
+    JENKINS_KEY=$(kubectl exec ${KUBE_JENKINS} -- curl -D - -s -k -c /tmp/cook.txt -b /tmp/cook.txt http://localhost:8080/me/configure | grep "apiToken" | sed -n 's/.*id=.apiToken.\(.*\)\/>.*/\1/p' | sed -n 's/.*value=\"\([[:xdigit:]^>]*\)\".*/\1/p' 2>/dev/null)
+done
+echo -n "${JENKINS_KEY}"
+echo ""
 
 ### create secrets for ACR
 
