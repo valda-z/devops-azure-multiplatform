@@ -95,8 +95,8 @@ JENKINS_KEY=""
 REGISTRY_SERVER=""
 REGISTRY_USER_NAME=""
 REGISTRY_PASSWORD=""
-CREDENTIALS_ID=${REGISTRY_SERVER}
-CREDENTIALS_DESC=${REGISTRY_SERVER}
+CREDENTIALS_ID=""
+CREDENTIALS_DESC=""
 POSTGRESQLSERVER_URL="jdbc:postgresql://{postgresqlfqdn}:5432/postgres?user={postgresqluser}@{postgresqlname}&password={postgresqlpassword}&ssl=true"
 APPINSIGHTS_KEY=""
 
@@ -171,6 +171,8 @@ echo "  .. create ACR"
 az acr create -n ${ACRNAME} -g ${RESOURCEGROUP} --location ${LOCATION} --admin-enabled true --sku Basic > /dev/null
 read REGISTRY_SERVER <<< $(az acr show -g ${RESOURCEGROUP} -n ${ACRNAME} --query [loginServer] -o tsv)
 read REGISTRY_USER_NAME REGISTRY_PASSWORD <<< $(az acr credential show -g ${RESOURCEGROUP} -n ${ACRNAME} --query [username,passwords[0].value] -o tsv)
+CREDENTIALS_ID=${REGISTRY_SERVER}
+CREDENTIALS_DESC=${REGISTRY_SERVER}
 
 #############################################################
 # configure kubectl, helm
