@@ -207,7 +207,7 @@ echo "      .. waiting for pods"
 echo -n "         ."
 KUBE_JENKINS=""
 while [  -z "$KUBE_JENKINS" ]; do
-    echo "."
+    echo -n "."
     sleep 3
     KUBE_JENKINS=$(kubectl get pods | grep "\-jenkins\-" | awk '{print $1;}')
 done
@@ -327,7 +327,7 @@ echo "  .. waiting for jenkins public IP"
 echo -n "     ."
 JENKINS_IP=""
 while [  -z "$JENKINS_IP" ]; do
-    echo "."
+    echo -n "."
     sleep 3
     JENKINS_IP=$(kubectl describe service myjenkins-jenkins | grep "LoadBalancer Ingress:" | awk '{print $3}')
 done
