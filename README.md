@@ -1,3 +1,5 @@
+![devops.png](img/devops.png "")
+
 # DEVOPS quick start examples
 
 This repository contains quic start examples for different technologies like java, nodejs, c# and Azure Function App. Examples are stored in different branches in this repository.
