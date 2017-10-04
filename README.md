@@ -16,6 +16,9 @@ Whole solutions run in kubernetes cluster (Azure Container Services), CI/CD pipe
 
 
 ### Solution can be provisioned by this simple script from Azure Cloud Shell:
+* **prerequisites**
+ * you need your SSH (private and public) key prepared in cloud shell 
+ * public ssh key is in file `~/.ssh/id_rsa.pub`
 * run Azure Cloud Shell
 * ![img1.png](img/img1.png "")
 * There run install script and provide necessary parameters
