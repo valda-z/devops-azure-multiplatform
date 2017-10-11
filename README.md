@@ -40,6 +40,53 @@ Whole solutions run in kubernetes cluster (Azure Container Services), CI/CD pipe
 * You have to build docker image - from Jenkis management console `http://[YUOR-JENKINS-IP]:8080` you can run build action on task `MyJava`
 * you can reach your application from web browser on URL: `https://[YOUR-WEBAPP-IP]`, public IP address of your application can be obtained from kubernetes control plane UI or from Azure Cloud Shell by running command `kubectl get services` 
 
+#### SonarQube integration - code analaysis and quality gate
+* clone repository https://github.com/Smarsh/helm-sonarqube.git
+* than you can install SonarQube via helm: `helm install`
+* after successfull instalation you can get public IP address of SonarQube by `kubectl get services`
+* SonarQube default username is `admin` and default password is `admin`
+* Install these plugins `SonarQube Scanner for Jenkins` ;`Pipeline Utility Steps` and `HTTP Request Plugin`
+* Configure Sonar in Jenkins Configuration -> "Configure System" (URL of Sonar, API Key)
+ * Process how to generate API key in SonarQube:
+     * Go to User  -> My Account setting (top right menu item)
+	 * Security tab
+	 * Generate token 
+* Change Jenkins Jenkins Pipeline
+ * Pipeline like a Script edited in Jenkins (use source file ./src/main/jenkins/Jenkinsfile
+ * insert new stage just after `Maven build` stage
+
+```groovy
+container(name: 'maven') {
+	stage('SonarQube analysis') {
+		withSonarQubeEnv('SONAR') {
+			sh 'mvn -Dsonar.host.url=http://mysonarqube-sonarqube -Dsonar.login=f588XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX19 org.sonarsource.scanner.maven:sonar-maven-plugin:3.2:sonar'
+		}
+	}
+	stage("Quality Gate"){
+		def props = readProperties file: 'target/sonar/report-task.txt'
+		echo "properties=${props}"
+		def sonarServerUrl=props['serverUrl']
+		def ceTaskUrl= props['ceTaskUrl']
+		def ceTask
+		timeout(time: 10, unit: 'MINUTES') {
+			waitUntil {
+				def response = httpRequest ceTaskUrl
+				ceTask = readJSON text: response.content
+				echo ceTask.toString()
+				return "SUCCESS".equals(ceTask["task"]["status"])
+			}
+		}
+		def response2 = httpRequest url : sonarServerUrl + "/api/qualitygates/project_status?analysisId=" + ceTask["task"]["analysisId"]
+		def qualitygate = readJSON text: response2.content
+		echo qualitygate.toString()
+		if ("ERROR".equals(qualitygate["projectStatus"]["status"])) {
+			error "Quality Gate failure"
+		}
+	}
+}
+```
+ 
+ 
 #### Possible optimalization
 * create special docker image for build with customized build environment
 * use persistent volume for maven build agent - it can decrease build time because of persistent artifact of maven (in our case these artifacts have to be loaded each time than build is triggered.
