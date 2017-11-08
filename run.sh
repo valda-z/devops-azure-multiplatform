@@ -2,7 +2,8 @@
 
 #####################################################################
 # user defined parameters
-LOCATION=""
+LOCATION="westus2"
+LOCATIONPOSTGRES="westus"
 RESOURCEGROUP=""
 KUBERNETESNAME=""
 ACRNAME=""
@@ -18,6 +19,10 @@ do
   case $key in
     --location)
       LOCATION="$1"
+      shift
+      ;;
+    --locationpostgres)
+      LOCATIONPOSTGRES="$1"
       shift
       ;;
     --resource-group)
@@ -66,6 +71,7 @@ function throw_if_empty() {
 
 #check parametrs
 throw_if_empty --location $LOCATION
+throw_if_empty --locationpostgres $LOCATIONiPOSTGRES
 throw_if_empty --resource-group $RESOURCEGROUP
 throw_if_empty --kubernetes-name  $KUBERNETESNAME
 throw_if_empty --acr-name  $ACRNAME
@@ -78,7 +84,7 @@ throw_if_empty --jenkins-password $JENKINSPASSWORD
 # constants
 APPINSIGHTSNAME="${KUBERNETESNAME}-appinsights"
 GITURL="https://github.com/valda-z/devops-azure-multiplatform.git"
-GITBRANCH="java-k8s"
+GITBRANCH="java-aks"
 JENKINSJOBNAME="MyJava"
 IMAGENAME="myjavawebapp"
 HELMCHART="myjavawebapp"
@@ -149,8 +155,8 @@ echo "  .. create Resource group"
 az group create --name ${RESOURCEGROUP} --location ${LOCATION} > /dev/null
 
 ### create kubernetes cluster
-echo "  .. create ACS with kubernetes"
-az acs create --orchestrator-type kubernetes --resource-group ${RESOURCEGROUP} --name ${KUBERNETESNAME} --location ${LOCATION} --admin-username ${KUBERNETESADMINUSER} --ssh-key-value "$(< ${SSHPUBKEY})" > /dev/null
+echo "  .. create AKS with kubernetes"
+az aks create --resource-group ${RESOURCEGROUP} --name ${KUBERNETESNAME} --location ${LOCATION} --agent-count 3 --admin-username ${KUBERNETESADMINUSER} --ssh-key-value ${SSHPUBKEY} > /dev/null
 
 ### create application insights
 echo "  .. create App Insights"
@@ -158,7 +164,7 @@ APPINSIGHTS_KEY=$(az resource create -g ${RESOURCEGROUP} -n ${APPINSIGHTSNAME} -
 
 ### create postgresql as a service
 echo "  .. create postgresql PaaS database"
-az postgres server create -l ${LOCATION} -g ${RESOURCEGROUP} -n ${POSTGRESQLNAME} -u ${POSTGRESQLUSER} -p "${POSTGRESQLPASSWORD}" --performance-tier Basic --compute-units 50 --ssl-enforcement Enabled --storage-size 51200 > /dev/null
+az postgres server create -l ${LOCATIONPOSTGRES} -g ${RESOURCEGROUP} -n ${POSTGRESQLNAME} -u ${POSTGRESQLUSER} -p "${POSTGRESQLPASSWORD}" --performance-tier Basic --compute-units 50 --ssl-enforcement Enabled --storage-size 51200 > /dev/null
 az postgres server firewall-rule create -g ${RESOURCEGROUP} -s ${POSTGRESQLNAME} -n allowall --start-ip-address 0.0.0.0 --end-ip-address 255.255.255.255 > /dev/null
 read postgresqlfqdn <<< $(az postgres server show -g ${RESOURCEGROUP} -n ${POSTGRESQLNAME} --query [fullyQualifiedDomainName] -o tsv)
 POSTGRESQLSERVER_URL=${POSTGRESQLSERVER_URL//'{postgresqlfqdn}'/${postgresqlfqdn}}
@@ -182,16 +188,15 @@ echo "  .. configuring kubectl and helm"
 
 echo "      .. get kubectl credentials"
 ### initialize .kube/config
-az acs kubernetes get-credentials --resource-group=${RESOURCEGROUP} --name=${KUBERNETESNAME} > /dev/null
+az aks get-credentials --resource-group=${RESOURCEGROUP} --name=${KUBERNETESNAME} > /dev/null
 retry_until_successful kubectl get nodes
 sleep 20
+retry_until_successful kubectl patch storageclass default -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}' > /dev/null
 
 echo "      .. helm init"
 ### initialize helm
-curl -s -o helm.tar.gz https://kubernetes-helm.storage.googleapis.com/helm-v2.5.1-linux-amd64.tar.gz
-tar -zxvf helm.tar.gz
-retry_until_successful ./linux-amd64/helm init > /dev/null
-retry_until_successful ./linux-amd64/helm version
+retry_until_successful helm init > /dev/null
+retry_until_successful helm version
 sleep 20
 
 #############################################################
@@ -202,7 +207,7 @@ echo "  .. installing jenkins"
 
 echo "      .. helming jenkins"
 ### install jenkins to kubernetes cluster
-./linux-amd64/helm install --name ${JENKINSSERVICENAME} stable/jenkins --set "Master.AdminPassword=${JENKINSPASSWORD}" >/dev/null
+helm install --name ${JENKINSSERVICENAME} stable/jenkins --set "Master.AdminPassword=${JENKINSPASSWORD}" >/dev/null
 
 echo "      .. waiting for pods"
 ### get node name
@@ -211,7 +216,7 @@ KUBE_JENKINS=""
 while [  -z "$KUBE_JENKINS" ]; do
     echo -n "."
     sleep 3
-    KUBE_JENKINS=$(kubectl get pods | grep "\-jenkins\-" | awk '{print $1;}')
+    KUBE_JENKINS=$(kubectl get pods | grep "\-jenkins\-" | grep "Running" | awk '{print $1;}')
 done
 echo ""
 
