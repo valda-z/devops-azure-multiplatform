@@ -71,7 +71,7 @@ function throw_if_empty() {
 
 #check parametrs
 throw_if_empty --location $LOCATION
-throw_if_empty --locationpostgres $LOCATIONiPOSTGRES
+throw_if_empty --locationpostgres $LOCATIONPOSTGRES
 throw_if_empty --resource-group $RESOURCEGROUP
 throw_if_empty --kubernetes-name  $KUBERNETESNAME
 throw_if_empty --acr-name  $ACRNAME
