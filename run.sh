@@ -217,6 +217,15 @@ while [  -z "$KUBE_JENKINS" ]; do
     echo -n "."
     sleep 3
     KUBE_JENKINS=$(kubectl get pods | grep "\-jenkins\-" | grep "Running" | awk '{print $1;}')
+    if [ -z "${KUBE_JENKINS}" ]; then
+    	KUBE_JENKINS=$(kubectl get pods | grep "\-jenkins\-" | grep "CrashLoopBackOff" | awk '{print $1;}')
+	if [ -n "${KUBE_JENKINS}" ]; then
+	    helm del --purge ${JENKINSSERVICENAME}
+	    sleep 10
+            helm install --name ${JENKINSSERVICENAME} stable/jenkins --set "Master.AdminPassword=${JENKINSPASSWORD}" 
+	fi
+    	KUBE_JENKINS=""
+    fi
 done
 echo ""
 
