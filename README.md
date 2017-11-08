@@ -1,10 +1,10 @@
-# DEVOPS JAVA - Kubernetes (jenkins, helm), PostgreSQL, ACR
+# DEVOPS JAVA - Kubernetes in AKS (jenkins, helm), PostgreSQL, ACR
 
 This demo contains simple one page web app with REST API backend (dockerized JAVA Spring Boot application) and Azure PostgreSQL DB for data persistence.
-Whole solutions run in kubernetes cluster (Azure Container Services), CI/CD pipeline also runs in kubernetes cluster and is powered by Jenkins - master node of Jenkins run like separate Pod, all build agents are provisioned on-fly like separate build-agent nodes.
+Whole solutions run in kubernetes cluster (Azure Kubernetes Service), CI/CD pipeline also runs in kubernetes cluster and is powered by Jenkins - master node of Jenkins run like separate Pod, all build agents are provisioned on-fly like separate build-agent nodes.
 
 ### Demonstrated DEVOPS scenario:
-* automatically create infrastructure environment Kubernetes (with Jenkins), ACR, PostgreSQL).
+* automatically create infrastructure environment Kubernetes AKS (with Jenkins), ACR, PostgreSQL).
 * configured Jenkins with build job - Jenkins is able to build Maven project, push docker images to Azure Container Registry and deploy application via helm to kubernetes cluster.
 * PostgreSQL is configured with enabled firewall rules to all IP addresses.
 * Kubernetes cluster is preconfigured with secrets for accessing Application Insights (Instrumentation key) and JDBC connection string to postgres DB.
@@ -22,15 +22,16 @@ Whole solutions run in kubernetes cluster (Azure Container Services), CI/CD pipe
 * run Azure Cloud Shell
 * ![img1.png](img/img1.png "")
 * There run install script and provide necessary parameters
-* `curl -s https://raw.githubusercontent.com/valda-z/devops-azure-multiplatform/java-k8s/run.sh | bash -s -- --location southcentralus --resource-group KUBE --kubernetes-name valdakube --acr-name valdakubeacr --postgresql-name valdakubepostgres --jenkins-password kube123`
+* `curl -s https://raw.githubusercontent.com/valda-z/devops-azure-multiplatform/java-aks/run.sh | bash -s -- --resource-group KUBE --kubernetes-name valdakube --acr-name valdakubeacr --postgresql-name valdakubepostgres --jenkins-password kube123`
 * supported parameters are:
  * Mandatory
-     * `--location` - Azure region for resource group and all resources 
      * `--resource-group` - Azure resource group name (will be created by script)
      * `--kubernetes-name` - Unique name for kubernetes cluster 
      * `--acr-name` - **Unique** name for Azure Container Registry 
      * `--postgresql-name` - **Unique** name of PostgreSQL instance in Azure 
  * Optional (if not provided than script uses defaults - see script)
+     * `--location` - Azure region for resource group and all resources (use westus2)
+     * `--locationpostgres` - Azure region for postgres database service (use westus)
      * `--postgresql-user` - Azure region for resource group and all resources 
      * `--postgresql-password` - Azure region for resource group and all resources 
      * `--jenkins-password` - Azure region for resource group and all resources 
