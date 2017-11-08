@@ -7,11 +7,19 @@ Examples contain simple AngularJS based web application with RESTfull back-end, 
 
 ### Branch java-k8s
 
-Java solution uses PostgreSql (Azure database) and Web App on Linux with Jenkins build server.
+Java solution uses PostgreSql (Azure database) and Kubernetes Azure Container Service with Jenkins build server.
 
 Whole solutions run in kubernetes cluster (Azure Container Services), CI/CD pipeline also runs in kubernetes cluster and is powered by Jenkins - master node of Jenkins run like separate Pod, all build agents are provisioned on-fly like separate build-agent nodes.
 
 Solution details and deployment button: https://github.com/valda-z/devops-azure-multiplatform/tree/java-k8s
+
+### Branch java-aks
+
+Java solution uses PostgreSql (Azure database) and Azure Kubernetes Service with Jenkins build server.
+
+Whole solutions run in kubernetes cluster (Azure Kubernetes  Service - AKS), CI/CD pipeline also runs in kubernetes cluster and is powered by Jenkins - master node of Jenkins run like separate Pod, all build agents are provisioned on-fly like separate build-agent nodes.
+
+Solution details and deployment button: https://github.com/valda-z/devops-azure-multiplatform/tree/java-aks
 
 
 ### Branch cs
