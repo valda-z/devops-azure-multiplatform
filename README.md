@@ -42,8 +42,7 @@ Whole solutions run in kubernetes cluster (Azure Kubernetes Service), CI/CD pipe
 * you can reach your application from web browser on URL: `https://[YOUR-WEBAPP-IP]`, public IP address of your application can be obtained from kubernetes control plane UI or from Azure Cloud Shell by running command `kubectl get services` 
 
 #### SonarQube integration - code analaysis and quality gate
-* clone repository https://github.com/Smarsh/helm-sonarqube.git
-* than you can install SonarQube via helm: `helm install`
+* Install SonarQube via helm: `helm install stable/sonarqube`
 * after successfull instalation you can get public IP address of SonarQube by `kubectl get services`
 * SonarQube default username is `admin` and default password is `admin`
 * Install these plugins `SonarQube Scanner for Jenkins` ;`Pipeline Utility Steps` and `HTTP Request Plugin`
