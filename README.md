@@ -45,7 +45,7 @@ Whole solutions run in kubernetes cluster (Azure Container Services), CI/CD pipe
 * after successfull instalation you can get public IP address of SonarQube by `kubectl get services`
 * SonarQube default username is `admin` and default password is `admin`
 * Install these plugins `SonarQube Scanner for Jenkins` ;`Pipeline Utility Steps` and `HTTP Request Plugin`
-* Configure Sonar in Jenkins Configuration -> "Configure System" (URL of Sonar, API Key)
+* Configure Sonar in Jenkins Configuration -> "Configure System" (URL of Sonar, API Key, Name: `SONAR`)
  * Process how to generate API key in SonarQube:
      * Go to User  -> My Account setting (top right menu item)
 	 * Security tab
@@ -58,7 +58,7 @@ Whole solutions run in kubernetes cluster (Azure Container Services), CI/CD pipe
 container(name: 'maven') {
 	stage('SonarQube analysis') {
 		withSonarQubeEnv('SONAR') {
-			sh 'mvn -Dsonar.host.url=http://mysonarqube-sonarqube -Dsonar.login=f588XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX19 org.sonarsource.scanner.maven:sonar-maven-plugin:3.2:sonar'
+			sh 'mvn -Dsonar.host.url=http://estranged-mule-sonarqube:9000 -Dsonar.login=f588XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX19 org.sonarsource.scanner.maven:sonar-maven-plugin:3.2:sonar'
 		}
 	}
 	stage("Quality Gate"){
