@@ -188,7 +188,7 @@ sleep 20
 
 echo "      .. helm init"
 ### initialize helm
-curl -s -o helm.tar.gz https://kubernetes-helm.storage.googleapis.com/helm-v2.5.1-linux-amd64.tar.gz
+curl -s -o helm.tar.gz https://kubernetes-helm.storage.googleapis.com/helm-v2.6.1-linux-amd64.tar.gz
 tar -zxvf helm.tar.gz
 retry_until_successful ./linux-amd64/helm init > /dev/null
 retry_until_successful ./linux-amd64/helm version
