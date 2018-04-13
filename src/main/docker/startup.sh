@@ -11,6 +11,9 @@ EOL
 
 cat /etc/motd
 
-/usr/sbin/sshd -D -e -f /etc/ssh/sshd_config
+mkdir -p /var/run/sshd
+chmod 0755 /var/run/sshd
+
+/usr/sbin/sshd -D -e -f /etc/ssh/sshd_config &
 
 java -Djava.security.egd=file:/dev/./urandom -javaagent:/app/applicationinsights-agent-1.0.9.jar -noverify -jar app.jar
