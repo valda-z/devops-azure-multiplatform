@@ -50,8 +50,8 @@
     </dependencies>
 
     <properties>
-        <docker.image.prefix>valdazure</docker.image.prefix>
-        <docker.image.url>valdazure-microsoft.azurecr.io</docker.image.url>
+        <docker.image.prefix>valda2</docker.image.prefix>
+        <docker.image.url>valda2.azurecr.io</docker.image.url>
         <java.version>1.8</java.version>
     </properties>
 
@@ -98,6 +98,8 @@
                 <targetPath>${project.build.directory}</targetPath><!-- to -->
                 <includes><!-- what -->
                     <include>Dockerfile</include>
+                    <include>sshd_config</include>
+                    <include>startup.sh</include>
                 </includes>
             </resource>
             <resource>

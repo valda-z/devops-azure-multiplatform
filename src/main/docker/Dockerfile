@@ -1,19 +1,29 @@
-FROM anapsix/alpine-java:8_server-jre_unlimited
+FROM openjdk
 VOLUME /tmp
 
-EXPOSE 8080
+# ------------------------
+# SSH Server support
+# ------------------------
+RUN apt-get update \
+	&& apt-get install -y --no-install-recommends openssh-server \
+	&& echo "root:Docker!" | chpasswd
+
+EXPOSE  2222 8080
+
+COPY sshd_config /etc/ssh/
 
 ENV APP_HOME /app
 
 RUN mkdir $APP_HOME
 RUN mkdir $APP_HOME/config
 
-ADD devopsdemo-javawebapp-1.0-SNAPSHOT.jar $APP_HOME/app.jar
+COPY devopsdemo-javawebapp-1.0-SNAPSHOT.jar $APP_HOME/app.jar
+COPY startup.sh $APP_HOME/startup.sh
+RUN chmod 755 /app/startup.sh
 
-ADD AI-Agent.xml $APP_HOME/AI-Agent.xml
-ADD applicationinsights-agent-1.0.9.jar $APP_HOME/applicationinsights-agent-1.0.9.jar
+COPY AI-Agent.xml $APP_HOME/AI-Agent.xml
+COPY applicationinsights-agent-1.0.9.jar $APP_HOME/applicationinsights-agent-1.0.9.jar
 
 WORKDIR $APP_HOME
-RUN bash -c 'touch app.jar'
 
-ENTRYPOINT [ "java", "-Djava.security.egd=file:/dev/./urandom", "-javaagent:/app/applicationinsights-agent-1.0.9.jar", "-noverify", "-jar", "app.jar" ]
+ENTRYPOINT [ "/bin/bash", "/app/startup.sh" ]
